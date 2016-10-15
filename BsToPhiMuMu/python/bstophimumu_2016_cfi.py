@@ -113,7 +113,7 @@ from PhysicsTools.PatAlgos.tools.coreTools import runOnData
 runOnData( process, outputModules = [] )
 
 process.TFileService = cms.Service("TFileService",
-        fileName = cms.string('BsToPhiMuMu_2016B.root'),
+        fileName = cms.string('BsToPhiMuMu_2016.root'),
 )
 
 process.p = cms.Path(process.ntuple)
