@@ -1,0 +1,10 @@
+11-Aug-2016 17:32:59 CEST  Initiating request to open file root://eoscms.cern.ch//eos/cms/store/data/Run2012A/MuOnia/AOD/22Jan2013-v1/30000/000D2FF5-EE82-E211-BEBA-0026189438A5.root
+11-Aug-2016 17:32:59 CEST  Fallback request to file root://xrootd-cms.infn.it//store/data/Run2012A/MuOnia/AOD/22Jan2013-v1/30000/000D2FF5-EE82-E211-BEBA-0026189438A5.root
+11-Aug-2016 17:33:03 CEST  Successfully opened file root://xrootd-cms.infn.it//store/data/Run2012A/MuOnia/AOD/22Jan2013-v1/30000/000D2FF5-EE82-E211-BEBA-0026189438A5.root
+%MSG-i myBs:  BsToPhiMuMu:ntuple 11-Aug-2016 17:34:26 CEST  Run: 193621 Event: 946332963
+Found 2 Bs -> phi(KK) mu+ mu- 
+%MSG
+%MSG-i myBs:  BsToPhiMuMu:ntuple 11-Aug-2016 17:34:56 CEST  Run: 193621 Event: 946425692
+Found 1 Bs -> phi(KK) mu+ mu- 
+%MSG
+11-Aug-2016 17:35:00 CEST  Closed file root://xrootd-cms.infn.it//store/data/Run2012A/MuOnia/AOD/22Jan2013-v1/30000/000D2FF5-EE82-E211-BEBA-0026189438A5.root

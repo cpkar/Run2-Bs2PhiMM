@@ -1,0 +1,41 @@
+2016-05-27 13:18:38.635690:
+Executed:	eval `scram unsetenv -sh` ; lcg-ls  srm://se01.indiacms.res.in:8446/srm/managerv2?SFN=/dpm/indiacms.res.in/home/cms/store/user/dsahoo/BsToJpsiPhi_8TeV_MC/BsToPhiMuMu_1_1_hH9.root
+Done with exit code:	0
+and output:
+/dpm/indiacms.res.in/home/cms/store/user/dsahoo/BsToJpsiPhi_8TeV_MC/BsToPhiMuMu_1_1_hH9.root
+
+
+2016-05-27 13:18:39.901240:
+Executed:	eval `scram unsetenv -sh` ; lcg-ls -l  srm://se01.indiacms.res.in:8446/srm/managerv2?SFN=/dpm/indiacms.res.in/home/cms/store/user/dsahoo/BsToJpsiPhi_8TeV_MC/BsToPhiMuMu_1_1_hH9.root | awk '{print $5}'
+Done with exit code:	0
+and output:
+3293141
+
+
+2016-05-27 13:19:15.941250:
+Executed:	eval `scram unsetenv -sh` ;  lcg-cp  --verbose  --vo=cms   srm://se01.indiacms.res.in:8446/srm/managerv2?SFN=/dpm/indiacms.res.in/home/cms/store/user/dsahoo/BsToJpsiPhi_8TeV_MC/BsToPhiMuMu_1_1_hH9.root file:///afs/cern.ch/user/d/dsahoo/private/BsToPhiMuMu_8TeV/CMSSW_5_3_20/src/Bphysics/BsToPhiMuMu/python/crab_0_160526_155535/res/BsToPhiMuMu_1_1_hH9.root
+Done with exit code:	0
+and output:
+Using grid catalog type: UNKNOWN
+Using grid catalog : (null)
+VO name: cms
+Checksum type: None
+Trying SURL srm://se01.indiacms.res.in:8446/srm/managerv2?SFN=/dpm/indiacms.res.in/home/cms/store/user/dsahoo/BsToJpsiPhi_8TeV_MC/BsToPhiMuMu_1_1_hH9.root ...
+Source SE type: SRMv2
+Source SRM Request Token: 1c521580-c80b-41c2-9641-6513d0b801a6
+Source URL: srm://se01.indiacms.res.in:8446/srm/managerv2?SFN=/dpm/indiacms.res.in/home/cms/store/user/dsahoo/BsToJpsiPhi_8TeV_MC/BsToPhiMuMu_1_1_hH9.root
+File size: 3293141
+Source URL for copy: gsiftp://dpms29.indiacms.res.in/dpms29.indiacms.res.in:/disk02/cms/2016-05-26/BsToPhiMuMu_1_1_hH9.root.13785418.0
+Destination URL: file:/afs/cern.ch/user/d/dsahoo/private/BsToPhiMuMu_8TeV/CMSSW_5_3_20/src/Bphysics/BsToPhiMuMu/python/crab_0_160526_155535/res/BsToPhiMuMu_1_1_hH9.root
+# streams: 1
+            0 bytes      0.00 KB/sec avg      0.00 KB/sec inst
+            0 bytes      0.00 KB/sec avg      0.00 KB/sec inst
+            0 bytes      0.00 KB/sec avg      0.00 KB/sec inst
+            0 bytes      0.00 KB/sec avg      0.00 KB/sec inst
+            0 bytes      0.00 KB/sec avg      0.00 KB/sec inst
+            0 bytes      0.00 KB/sec avg      0.00 KB/sec inst
+            0 bytes      0.00 KB/sec avg      0.00 KB/sec inst
+
+Transfer took 6150 ms
+
+
