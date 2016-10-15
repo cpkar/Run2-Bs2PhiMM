@@ -1,6 +1,0 @@
-DEBUG 2016-08-13 14:46:01,746: 	 Executing command: 'status'
-DEBUG 2016-08-13 14:46:01,746: 	 Found CRAB cache file /afs/cern.ch/user/j/jmejiagu/.crab3
-DEBUG 2016-08-13 14:46:01,762: 	 Checking credentials
-DEBUG 2016-08-13 14:46:01,763: 	 Found proxy file /tmp/x509up_u37798
-DEBUG 2016-08-13 14:46:01,763: 	 Getting proxy life time left
-ERROR 2016-08-13 14:46:01,975: 	 Keyboard Interrupted
