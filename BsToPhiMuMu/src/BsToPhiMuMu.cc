@@ -15,7 +15,8 @@
 //        copyright  @ N.Sahoo, NISER, Bhubaneswar                     |
 //         created:  Sat Nov 28 07:33:44 CET 2015                      |
 //         added saveGenInfo  (sat 16 jan 2016)                        |
-//         added soft muon id info, trigger matching info (sat 16 jan) | 
+//         added soft muon id info, trig matching info (sat 16 jan'16) | 
+//         added truth-matching vars (fri 28 oct'16)                   |
 // Edit by: Jhovanny Mejia <jhovanny.andres.mejia.guisao@cern.ch>      | 
 // Edit date <2016-08-11>                                              | 
 //=====================================================================
@@ -155,8 +156,8 @@ HistArgs hist_args[kHistNameSize] = {
   {"h_mumulxybs", "#mu^{+}#mu^{-} Lxy #sigma beam spot", 100, 0, 100},
 
   {"h_mumucosalphabs", "#mu^{+}#mu^{-} cos #alpha beam spot", 100, 0, 1},
-  {"h_trkpt", "Pion track pT; pT [GeV]", 100, 0, 20},
-  {"h_trkdcasigbs", "Pion track DCA/#sigma beam spot; DCA/#sigma", 1000, 0, 100},
+  {"h_kaontrkpt", "kaon track pT; pT [GeV]", 100, 0, 20},
+  {"h_trkdcasigbs", "kaon track DCA/#sigma beam spot; DCA/#sigma", 1000, 0, 100},
   {"h_bsvtxchisq", "B_{s} decay vertex chisq", 100, 0, 1000},
   {"h_bsvtxcl", "B_{s} decay vertex CL", 100, 0, 1},
 
@@ -263,6 +264,8 @@ class BsToPhiMuMu : public edm::EDAnalyzer {
   void saveBsCtau(RefCountedKinematicTree);
 
   void saveGenInfo(const edm::Event&);
+  void savePhiVariables(RefCountedKinematicTree,
+			   reco::VertexCompositeCandidate);
   void saveSoftMuonVariables(pat::Muon, pat::Muon, reco::TrackRef, reco::TrackRef);
   void saveDimuVariables(double, double, double, double, double, double,
                          double, double, double, double, double, double,
@@ -316,6 +319,7 @@ class BsToPhiMuMu : public edm::EDAnalyzer {
   bool   KeepGENOnly_;
   double TruthMatchMuonMaxR_;
   double TruthMatchKaonMaxR_;
+  double TruthMatchPhiMaxVtx_;
 
   //---------------------                                                                                                                                           
   // pre-selection cuts                                                                                                                                   
@@ -383,9 +387,10 @@ class BsToPhiMuMu : public edm::EDAnalyzer {
   //--------------
   // kaon track   
   //--------------                                                                                                                                                          
-  vector<int> *trkchg; // +1 for K+, -1 for K-                                                                                                                            
-  vector<double> *trkpx, *trkpy, *trkpz, *trkpt;
-  vector<double> *trkdcabs, *trkdcabserr;
+  //vector<int> *trkchg; // +1 for K+, -1 for K-                                                                                                                            
+  //vector<double> *trkpx, *trkpy, *trkpz, *trkpt;
+  vector<double> *kptrkdcabs, *kptrkdcabserr;
+  vector<double> *kmtrkdcabs, *kmtrkdcabserr;
 
   //--------------
   // phi(1020)
@@ -394,10 +399,10 @@ class BsToPhiMuMu : public edm::EDAnalyzer {
   vector<double> *kppx, *kppy, *kppz ;
   vector<int>    *kmchg;
   vector<double> *kmpx, *kmpy, *kmpz ;
-  vector<double> *phipx, *phipy, *phipz;
-  vector<double> *phivtxx, *phivtxy, *phivtxz, *phivtxcl, *philsbs, *philsbserr;
+  //  vector<double> *phipx, *phipy, *phipz;
+  //  vector<double>  *phivtxx, *phivtxy, *phivtxz, *phivtxcl, *philsbs, *philsbserr;
 
-  vector<double> *phimass, *phimasserr, *phibarmass, *phibarmasserr;
+  vector<double> *phimass /*, *phimasserr, *phibarmass, *phibarmasserr */ ;
 
   //-----------------
   // Bs and Bsbar
@@ -408,7 +413,7 @@ class BsToPhiMuMu : public edm::EDAnalyzer {
   vector<double> *bvtxcl, *bvtxx, *bvtxxerr, *bvtxy, *bvtxyerr, *bvtxz, *bvtxzerr;
   vector<double> *bcosalphabs, *bcosalphabserr, *bcosalphabs2d, *bcosalphabs2derr, *blsbs, *blsbserr, *bctau, *bctauerr; 
 
-  vector<double> *bbarmass, *bbarmasserr;
+  // vector<double> *bbarmass, *bbarmasserr;
 
   //----------
   // For MC   
@@ -428,7 +433,7 @@ class BsToPhiMuMu : public edm::EDAnalyzer {
   
   string decname;
 
-  vector<bool> *istruemum, *istruemup, *istruekp, *istruekm, *istruebs;
+  vector<bool> *istruemum, *istruemup, *istruekp, *istruekm, *istruephi, *istruebs;
 
   //-----------------------
   // variables to monitor  
@@ -485,6 +490,7 @@ BsToPhiMuMu::BsToPhiMuMu(const edm::ParameterSet& iConfig):
   KeepGENOnly_(iConfig.getUntrackedParameter<bool>("KeepGENOnly")),
   TruthMatchMuonMaxR_(iConfig.getUntrackedParameter<double>("TruthMatchMuonMaxR")),
   TruthMatchKaonMaxR_(iConfig.getUntrackedParameter<double>("TruthMatchKaonMaxR")),
+  TruthMatchPhiMaxVtx_(iConfig.getUntrackedParameter<double>("TruthMatchPhiMaxVtx")),
 
   // pre-selection cuts                                                                                                                                                     
   MuonMinPt_(iConfig.getUntrackedParameter<double>("MuonMinPt")),
@@ -524,8 +530,9 @@ BsToPhiMuMu::BsToPhiMuMu(const edm::ParameterSet& iConfig):
   mumdzvtx(0), mupdzvtx(0), mumtriglastfilter(0), muptriglastfilter(0),
   mumpt(0), muppt(0), mumeta(0), mupeta(0),
 
-  trkchg(0), trkpx(0), trkpy(0), trkpz(0), trkpt(0),
-  trkdcabs(0), trkdcabserr(0),
+  //trkchg(0), trkpx(0), trkpy(0), trkpz(0), trkpt(0),
+  kptrkdcabs(0), kptrkdcabserr(0),
+  kmtrkdcabs(0), kmtrkdcabserr(0),
 
   kpchg(0),
   kppx(0), kppy(0), kppz(0),
@@ -534,16 +541,16 @@ BsToPhiMuMu::BsToPhiMuMu(const edm::ParameterSet& iConfig):
   kmpx(0), kmpy(0), kmpz(0),
 
 
-  phipx(0), phipy(0), phipz(0),
-  phivtxx(0), phivtxy(0), phivtxz(0),
+  //phipx(0), phipy(0), phipz(0),
+  //phivtxx(0), phivtxy(0), phivtxz(0),
 
-  phimass(0), phimasserr(0), phibarmass(0), phibarmasserr(0),
+  phimass(0), /* phimasserr(0), phibarmass(0), phibarmasserr(0), */
 
   nb(0), bpx(0), bpxerr(0), bpy(0), bpyerr(0), bpz(0), bpzerr(0), bmass(0), bmasserr(0),
   bvtxcl(0), bvtxx(0), bvtxxerr(0), bvtxy(0), bvtxyerr(0), bvtxz(0), bvtxzerr(0),
   bcosalphabs(0), bcosalphabserr(0), bcosalphabs2d(0), bcosalphabs2derr(0), blsbs(0), blsbserr(0), bctau(0), bctauerr(0),
 
-  bbarmass(0), bbarmasserr(0),
+  //bbarmass(0), bbarmasserr(0),
 
   genbpx(0), genbpy(0), genbpz(0),
   genphipx(0), genphipy(0), genphipz(0), genphivtxx(0), genphivtxy(0), genphivtxz(0),
@@ -559,7 +566,7 @@ BsToPhiMuMu::BsToPhiMuMu(const edm::ParameterSet& iConfig):
 
   decname(""),
 
-  istruemum(0), istruemup(0), istruekp(0), istruekm(0), istruebs(0)
+  istruemum(0), istruemup(0), istruekp(0), istruekm(0), istruephi(0), istruebs(0)
 
 
 {
@@ -701,13 +708,15 @@ BsToPhiMuMu::beginJob()
   tree_->Branch("muppt", &muppt);
   tree_->Branch("mumeta", &mumeta);
   tree_->Branch("mupeta", &mupeta);
-  tree_->Branch("trkchg", &trkchg);
-  tree_->Branch("trkpx", &trkpx);
-  tree_->Branch("trkpy", &trkpy);
-  tree_->Branch("trkpz", &trkpz);
-  tree_->Branch("trkpt", &trkpt);
-  tree_->Branch("trkdcabs", &trkdcabs);
-  tree_->Branch("trkdcabserr", &trkdcabserr);
+  //tree_->Branch("trkchg", &trkchg);
+  //tree_->Branch("trkpx", &trkpx);
+  //tree_->Branch("trkpy", &trkpy);
+  //tree_->Branch("trkpz", &trkpz);
+  //tree_->Branch("trkpt", &trkpt);
+  tree_->Branch("kptrkdcabs", &kptrkdcabs);
+  tree_->Branch("kptrkdcabserr", &kptrkdcabserr);
+  tree_->Branch("kmtrkdcabs", &kmtrkdcabs);
+  tree_->Branch("kmtrkdcabserr", &kmtrkdcabserr);
   tree_->Branch("kpchg", &kpchg);
   tree_->Branch("kppx", &kppx);
   tree_->Branch("kppy", &kppy);
@@ -717,16 +726,16 @@ BsToPhiMuMu::beginJob()
   tree_->Branch("kmpy", &kmpy);
   tree_->Branch("kmpz", &kmpz);
 
-  tree_->Branch("phipx", &phipx);
-  tree_->Branch("phipy", &phipy);
-  tree_->Branch("phipz", &phipz);
-  tree_->Branch("phivtxx", &phivtxx);
-  tree_->Branch("phivtxy", &phivtxy);
-  tree_->Branch("phivtxz", &phivtxz);
+  //tree_->Branch("phipx", &phipx);
+  //tree_->Branch("phipy", &phipy);
+  //tree_->Branch("phipz", &phipz);
+  //tree_->Branch("phivtxx", &phivtxx);
+  //tree_->Branch("phivtxy", &phivtxy);
+  //tree_->Branch("phivtxz", &phivtxz);
   tree_->Branch("phimass", &phimass);
-  tree_->Branch("phimasserr", &phimasserr);
-  tree_->Branch("phibarmass", &phibarmass);
-  tree_->Branch("phibarmasserr", &phibarmasserr);
+  //tree_->Branch("phimasserr", &phimasserr);
+  //tree_->Branch("phibarmass", &phibarmass);
+  //tree_->Branch("phibarmasserr", &phibarmasserr);
   tree_->Branch("nb", &nb, "nb/I");
   tree_->Branch("bpx", &bpx);
   tree_->Branch("bpxerr", &bpxerr);
@@ -751,8 +760,8 @@ BsToPhiMuMu::beginJob()
   tree_->Branch("blsbserr", &blsbserr);
   tree_->Branch("bctau", &bctau);
   tree_->Branch("bctauerr", &bctauerr);
-  tree_->Branch("bbarmass", &bbarmass);
-  tree_->Branch("bbarmasserr", &bbarmasserr);
+  //tree_->Branch("bbarmass", &bbarmass);
+  //tree_->Branch("bbarmasserr", &bbarmasserr);
 
   if (IsMonteCarlo_) {
     tree_->Branch("genbpx",      &genbpx     , "genbpx/D"    );
@@ -784,6 +793,7 @@ BsToPhiMuMu::beginJob()
     tree_->Branch("istruemup",  &istruemup );
     tree_->Branch("istruekp",   &istruekp  );
     tree_->Branch("istruekm",   &istruekm  );
+    tree_->Branch("istruephi",  &istruephi );
     tree_->Branch("istruebs",   &istruebs  );
 
   }
@@ -879,8 +889,9 @@ BsToPhiMuMu::clearVariables(){
   mumpt->clear(); muppt->clear();
   mumeta->clear(); mupeta->clear();
 
-  trkchg->clear(); trkpx->clear(); trkpy->clear(); trkpz->clear(); trkpt->clear();
-  trkdcabs->clear(); trkdcabserr->clear();
+  //trkchg->clear(); trkpx->clear(); trkpy->clear(); trkpz->clear(); trkpt->clear();
+  kptrkdcabs->clear(); kptrkdcabserr->clear();
+  kmtrkdcabs->clear(); kmtrkdcabserr->clear();
 
   kpchg->clear();
   kppx->clear(); kppy->clear(); kppz->clear();
@@ -888,11 +899,12 @@ BsToPhiMuMu::clearVariables(){
   kmchg->clear();
   kmpx->clear(); kmpy->clear(); kmpz->clear();
 
-  phipx->clear(); phipy->clear(); phipz->clear();
-  phivtxx->clear(); phivtxy->clear(); phivtxz->clear();
+  //phipx->clear(); phipy->clear(); phipz->clear();
+  //phivtxx->clear(); phivtxy->clear(); phivtxz->clear();
 
-  phimass->clear(); phimasserr->clear();
-  phibarmass->clear(); phibarmasserr->clear();
+  phimass->clear(); 
+  //phimasserr->clear();
+  //phibarmass->clear(); phibarmasserr->clear();
 
   nb = 0;
 
@@ -905,7 +917,7 @@ BsToPhiMuMu::clearVariables(){
   bcosalphabs2d->clear(); bcosalphabs2derr->clear();
   blsbs->clear(); blsbserr->clear(); bctau->clear(); bctauerr->clear();
 
-  bbarmass->clear(); bbarmasserr->clear();
+  //bbarmass->clear(); bbarmasserr->clear();
 
   if (IsMonteCarlo_) {
 
@@ -923,7 +935,7 @@ BsToPhiMuMu::clearVariables(){
 
     decname = "";
     istruemum->clear(); istruemup->clear(); istruekp->clear();
-    istruekm->clear(); istruebs->clear();
+    istruekm->clear(); istruephi->clear(); istruebs->clear();
 
 
   }
@@ -1026,12 +1038,14 @@ BsToPhiMuMu::buildBsToPhiMuMu(const edm::Event& iEvent)
   double mu_mu_vtx_cl, mu_mu_pt, mu_mu_mass, mu_mu_mass_err;
   double MuMuLSBS, MuMuLSBSErr;
   double MuMuCosAlphaBS, MuMuCosAlphaBSErr;
-  double trk_pt; 
+  double kaon_trk_pt; 
   reco::TransientTrack refitKmTT, refitKpTT;
-  double phi_mass, phi_vtx_cl;
+  double phi_mass /*phi_mass_err*/; 
+  double phi_vtx_cl;
   double b_vtx_chisq, b_vtx_cl, b_mass;
   //double bbar_mass;
-  double DCAPhiTrkBS, DCAPhiTrkBSErr;
+  double DCAPhiTrkpBS, DCAPhiTrkpBSErr;
+  double DCAPhiTrkmBS, DCAPhiTrkmBSErr;
   RefCountedKinematicTree vertexFitTree, barVertexFitTree;
 
 
@@ -1115,14 +1129,14 @@ BsToPhiMuMu::buildBsToPhiMuMu(const edm::Event& iEvent)
 	reco::TrackRef Trackm = iTrackM->track();
 	if ( Trackm.isNull() || (Trackm->charge() != -1) ) continue;
 
-	passed = hasGoodTrack(iEvent, *iTrackM, trk_pt);
-	histos[h_trkpt]->Fill(trk_pt);
+	passed = hasGoodTrack(iEvent, *iTrackM, kaon_trk_pt);
+	histos[h_trkpt]->Fill(kaon_trk_pt);
 	if (!passed) continue;
 	
 	// compute track DCA to beam spot
 	const reco::TransientTrack theTrackmTT(Trackm, &(*bFieldHandle_));
-	passed = hasGoodTrackDcaBs(theTrackmTT, DCAPhiTrkBS, DCAPhiTrkBSErr);
-	histos[h_trkdcasigbs]->Fill(DCAPhiTrkBS/DCAPhiTrkBSErr);
+	passed = hasGoodTrackDcaBs(theTrackmTT, DCAPhiTrkpBS, DCAPhiTrkpBSErr);
+	histos[h_trkdcasigbs]->Fill(DCAPhiTrkpBS/DCAPhiTrkpBSErr);
 	if (!passed) continue;
 
 	// ---------------------------------
@@ -1135,13 +1149,13 @@ BsToPhiMuMu::buildBsToPhiMuMu(const edm::Event& iEvent)
 	  reco::TrackRef Trackp = iTrackP->track();
 	  if ( Trackp.isNull() || (Trackp->charge() != 1) ) continue;
 
-	  passed = hasGoodTrack(iEvent, *iTrackP, trk_pt);
+	  passed = hasGoodTrack(iEvent, *iTrackP, kaon_trk_pt);
 	  // histos[h_trkpt]->Fill(trk_pt);
 	  if (!passed) continue;
 	  
 	  // compute track DCA to beam spot
 	  const reco::TransientTrack theTrackpTT(Trackp, &(*bFieldHandle_));
-	  passed = hasGoodTrackDcaBs(theTrackpTT, DCAPhiTrkBS, DCAPhiTrkBSErr);
+	  passed = hasGoodTrackDcaBs(theTrackpTT, DCAPhiTrkmBS, DCAPhiTrkmBSErr);
 	  if (!passed) continue;
 
 
@@ -1209,9 +1223,15 @@ BsToPhiMuMu::buildBsToPhiMuMu(const edm::Event& iEvent)
 	  saveSoftMuonVariables(*iMuonM, *iMuonP, muTrackm, muTrackp);
 	  // saveBsToPhiMuMu(vertexFitTree);
 
-	  trkdcabs->push_back(DCAPhiTrkBS);
-          trkdcabserr->push_back(DCAPhiTrkBSErr);
+	  // savePhiVariables(phiVertexFitTree, *iPhi);
+
+	  //trkpt->push_back(kaon_trk_pt);
+	  kptrkdcabs->push_back(DCAPhiTrkpBS);
+          kptrkdcabserr->push_back(DCAPhiTrkpBSErr);
+	  kmtrkdcabs->push_back(DCAPhiTrkmBS);
+          kmtrkdcabserr->push_back(DCAPhiTrkmBSErr);
 	  phimass->push_back(phi_mass);
+	  //phimasserr->push_back(phi_mass_err);
 	  bvtxcl->push_back(b_vtx_cl);
 	  //bmass->push_back(b_mass);
 
@@ -1623,6 +1643,10 @@ BsToPhiMuMu::hasGoodPhiVertex( const reco::TransientTrack kaonmTT,
   phi_vtx_cl = TMath::Prob((double)phi_KV->chiSquared(),
 			   int(rint(phi_KV->degreesOfFreedom())));
 
+  // NS @ added 2016-10-28
+  //phivtxx->push_back(phi_KV->position().x());
+  //phivtxy->push_back(phi_KV->position().y());
+  //phivtxz->push_back(phi_KV->position().z());
 
   // extract the re-fitted tracks
   phiVertexFitTree->movePointerToTheTop();
@@ -2055,14 +2079,14 @@ BsToPhiMuMu::saveGenInfo(const edm::Event& iEvent){
     genphivtxz = phi.vz();
 
     genkpchg = kp.charge();
-    genkppx = kp.px();
-    genkppy = kp.py();
-    genkppz = kp.pz();
+    genkppx  = kp.px();
+    genkppy  = kp.py();
+    genkppz  = kp.pz();
 
     genkmchg = km.charge();
-    genkmpx = km.px();
-    genkmpy = km.py();
-    genkmpz = km.pz();
+    genkmpx  = km.px();
+    genkmpy  = km.py();
+    genkmpz  = km.pz();
 
     genmumpx = mum->px();
     genmumpy = mum->py();
@@ -2176,6 +2200,85 @@ BsToPhiMuMu::saveMuonTriggerMatches(const pat::Muon iMuonM, const pat::Muon iMuo
 
 void
 BsToPhiMuMu::saveTruthMatch(const edm::Event& iEvent){
+  double deltaEtaPhi;
+
+  for (vector<int>::size_type i = 0; i < bmass->size(); i++) {//{{{
+   
+    //-----------------------
+    // truth match with mu-
+    //-----------------------
+    deltaEtaPhi = calEtaPhiDistance(genmumpx, genmumpy, genmumpz,
+				    mumpx->at(i), mumpy->at(i), mumpz->at(i));
+    if (deltaEtaPhi < TruthMatchMuonMaxR_) {
+      istruemum->push_back(true);
+    } else {
+      istruemum->push_back(false);
+    }
+
+    //-----------------------
+    // truth match with mu+
+    //-----------------------
+    deltaEtaPhi = calEtaPhiDistance(genmuppx, genmuppy, genmuppz,
+				    muppx->at(i), muppy->at(i), muppz->at(i));
+
+    if (deltaEtaPhi < TruthMatchMuonMaxR_) {
+      istruemup->push_back(true);
+    }
+    else {
+      istruemup->push_back(false);
+    }
+
+    //---------------------------------
+    // truth match with kaon+ track   
+    //---------------------------------                                                                                                                       
+    deltaEtaPhi = calEtaPhiDistance(genkppx, genkppy, genkppz,
+                                    kppx->at(i), kppy->at(i), kppz->at(i));
+    if (deltaEtaPhi < TruthMatchKaonMaxR_){
+      istruekp->push_back(true);
+    } else {
+      istruekp->push_back(false);
+    }
+
+    //---------------------------------                                                                                                                                     
+    // truth match with kaon- track                                                                                                                                             
+    //---------------------------------                                                                                                                                      
+    deltaEtaPhi = calEtaPhiDistance(genkmpx, genkmpy, genkmpz,
+                                    kmpx->at(i), kmpy->at(i), kmpz->at(i));
+    if (deltaEtaPhi < TruthMatchKaonMaxR_){
+      istruekm->push_back(true);
+    } else {
+      istruekm->push_back(false);
+    }
+
+    /*
+    //------------------------
+    // truth match phi vertex
+    //------------------------
+    float deltaRphivtx = sqrt( (genphivtxx - phivtxx->at(i))*
+			       (genphivtxx - phivtxx->at(i)) +
+			       (genphivtxy - phivtxy->at(i))*
+			       (genphivtxy - phivtxy->at(i)) +
+			       (genphivtxz - phivtxz->at(i))*
+			       (genphivtxz - phivtxz->at(i)) );
+
+    if ( istruekp && istruekm && (deltaRphivtx < TruthMatchPhiMaxVtx_) ){
+      istruephi->push_back(true);
+    } else {
+      istruephi->push_back(false);
+    }
+
+    //---------------------------------------
+    // truth match with Bs or Bs bar 
+    //---------------------------------------                                                                                                
+    if ( istruemum->back() && istruemup->back() && istruephi->back() ) {
+      istruebs->push_back(true);
+    } else {
+      istruebs->push_back(false);
+    }
+    */
+
+
+  }//}}}
 
 }
 
