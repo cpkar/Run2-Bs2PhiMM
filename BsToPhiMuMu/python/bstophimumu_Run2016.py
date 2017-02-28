@@ -9,7 +9,7 @@ import FWCore.ParameterSet.Config as cms
 from bstophimumu_2016_cfi import process 
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
 
 process.source = cms.Source("PoolSource",
         fileNames = cms.untracked.vstring(
@@ -18,7 +18,12 @@ process.source = cms.Source("PoolSource",
 #'/DoubleMuParked/Run2012A-22Jan2013-v1/AOD')
 #'/MuOniaParked/Run2012D-22Jan2013-v1/AOD')
 #'/store/data/Run2012D/MuOniaParked/AOD/22Jan2013-v1/10000/0009C032-C48D-E211-83FA-003048FEB956.root' )
-'/store/data/Run2016B/Charmonium/AOD/PromptReco-v2/000/273/158/00000/14E579B3-271A-E611-911E-02163E013584.root')
+#'/store/data/Run2016B/Charmonium/AOD/PromptReco-v2/000/273/158/00000/14E579B3-271A-E611-911E-02163E013584.root')
+#'/store/data/Run2016G/DoubleMuonLowMass/AOD/23Sep2016-v1/90000/F2D4D1D6-1597-E611-8963-0CC47A0AD63E.root')
+#'/store/data/Run2016B/DoubleMuonLowMass/AOD/23Sep2016-v3/00000/000D5D1A-3798-E611-982A-008CFA0647BC.root')
+#'/store/data/Run2016G/DoubleMuonLowMass/AOD/23Sep2016-v1/100000/001A518F-368C-E611-B0C9-0CC47A4C8E38.root')
+#'/store/data/Run2016E/DoubleMuonLowMass/AOD/23Sep2016-v1/100000/003C2808-EF93-E611-AD7E-0CC47A7C361E.root')
+'/store/data/Run2016B/DoubleMuonLowMass/AOD/23Sep2016-v3/00000/001AD4E7-4498-E611-B144-002590E7DF2A.root')
     )
 
 #process.GlobalTag.globaltag = cms.string('FT53_V21A_AN6::All')

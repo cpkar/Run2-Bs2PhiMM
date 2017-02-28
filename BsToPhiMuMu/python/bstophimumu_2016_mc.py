@@ -8,7 +8,7 @@ print "\n=> running on 2016 mc \n"
 import FWCore.ParameterSet.Config as cms
 from bstophimumu_2016_cfi import process 
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 process.source = cms.Source("PoolSource",
@@ -19,12 +19,13 @@ process.source = cms.Source("PoolSource",
 #'/MuOniaParked/Run2012D-22Jan2013-v1/AOD')
 #'/store/data/Run2012D/MuOniaParked/AOD/22Jan2013-v1/10000/0009C032-C48D-E211-83FA-003048FEB956.root' )
 #'/store/data/Run2016B/Charmonium/AOD/PromptReco-v2/000/273/158/00000/14E579B3-271A-E611-911E-02163E013584.root')
-'file:/afs/cern.ch/work/n/nsahoo/public/forDEEPAK/CMSSW_8_0_20/src/PYTHIA8_Bs2MuMuPhi_EtaPtFilter_CUEP8M1_13TeV_cff_STEP2.root')
+#'file:/afs/cern.ch/work/n/nsahoo/public/forDEEPAK/CMSSW_8_0_20/src/PYTHIA8_Bs2MuMuPhi_EtaPtFilter_CUEP8M1_13TeV_cff_STEP2.root')
+'/store/mc/RunIISummer16DR80Premix/BsToMuMuPhi_BMuonFilter_SoftQCDnonD_TuneCUEP8M1_13TeV-pythia8-evtgen/AODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/100000/004FAC41-C9CF-E611-9812-0242AC130004.root')
     )
 
 #process.GlobalTag.globaltag = cms.string('FT53_V21A_AN6::All')
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '80X_mcRun2_asymptotic_2016_TrancheIV_v2', '') 
+process.GlobalTag = GlobalTag(process.GlobalTag, '80X_mcRun2_asymptotic_2016_TrancheIV_v6', '') 
 
 
 
