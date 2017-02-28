@@ -17,6 +17,7 @@
 //         added saveGenInfo  (sat 16 jan 2016)                        |
 //         added soft muon id info, trig matching info (sat 16 jan'16) | 
 //         added truth-matching vars (fri 28 oct'16)                   |
+//         removed unnecessary vars (fri 28 oct'16)                    |
 // Edit by: Jhovanny Mejia <jhovanny.andres.mejia.guisao@cern.ch>      | 
 // Edit date <2016-08-11>                                              | 
 //=====================================================================
@@ -125,8 +126,8 @@ enum HistName{
   h_mumulxybs,
 
   h_mumucosalphabs,
-  h_trkpt,
-  h_trkdcasigbs,
+  h_kaontrkpt,
+  h_kaontrkdcasigbs,
   h_bsvtxchisq,
   h_bsvtxcl,
 
@@ -157,7 +158,7 @@ HistArgs hist_args[kHistNameSize] = {
 
   {"h_mumucosalphabs", "#mu^{+}#mu^{-} cos #alpha beam spot", 100, 0, 1},
   {"h_kaontrkpt", "kaon track pT; pT [GeV]", 100, 0, 20},
-  {"h_trkdcasigbs", "kaon track DCA/#sigma beam spot; DCA/#sigma", 1000, 0, 100},
+  {"h_kaontrkdcasigbs", "kaon track DCA/#sigma beam spot; DCA/#sigma", 1000, 0, 100},
   {"h_bsvtxchisq", "B_{s} decay vertex chisq", 100, 0, 1000},
   {"h_bsvtxcl", "B_{s} decay vertex CL", 100, 0, 1},
 
@@ -1130,13 +1131,13 @@ BsToPhiMuMu::buildBsToPhiMuMu(const edm::Event& iEvent)
 	if ( Trackm.isNull() || (Trackm->charge() != -1) ) continue;
 
 	passed = hasGoodTrack(iEvent, *iTrackM, kaon_trk_pt);
-	histos[h_trkpt]->Fill(kaon_trk_pt);
+	histos[h_kaontrkpt]->Fill(kaon_trk_pt);
 	if (!passed) continue;
 	
 	// compute track DCA to beam spot
 	const reco::TransientTrack theTrackmTT(Trackm, &(*bFieldHandle_));
 	passed = hasGoodTrackDcaBs(theTrackmTT, DCAPhiTrkpBS, DCAPhiTrkpBSErr);
-	histos[h_trkdcasigbs]->Fill(DCAPhiTrkpBS/DCAPhiTrkpBSErr);
+	histos[h_kaontrkdcasigbs]->Fill(DCAPhiTrkpBS/DCAPhiTrkpBSErr);
 	if (!passed) continue;
 
 	// ---------------------------------
