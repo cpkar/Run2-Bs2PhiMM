@@ -12,12 +12,13 @@
 */
 //=====================================================================
 // original author:  Niladribihari Sahoo,42 3-024,+41227662373,        |
-//        copyright  @ N.Sahoo, NISER, Bhubaneswar                     |
+//         copyright @ N.Sahoo, NISER, Bhubaneswar                     |
 //         created:  Sat Nov 28 07:33:44 CET 2015                      |
 //         added saveGenInfo  (sat 16 jan 2016)                        |
 //         added soft muon id info, trig matching info (sat 16 jan'16) | 
 //         added truth-matching vars (fri 28 oct'16)                   |
 //         removed unnecessary vars (fri 28 oct'16)                    |
+//         added quality variables (Tue 28 Feb'17)                     |
 // Edit by: Jhovanny Mejia <jhovanny.andres.mejia.guisao@cern.ch>      | 
 // Edit date <2016-08-11>                                              | 
 //=====================================================================
@@ -320,7 +321,7 @@ class BsToPhiMuMu : public edm::EDAnalyzer {
   bool   KeepGENOnly_;
   double TruthMatchMuonMaxR_;
   double TruthMatchKaonMaxR_;
-  double TruthMatchPhiMaxVtx_;
+  //double TruthMatchPhiMaxVtx_;
 
   //---------------------                                                                                                                                           
   // pre-selection cuts                                                                                                                                   
@@ -381,6 +382,7 @@ class BsToPhiMuMu : public edm::EDAnalyzer {
   vector<int>    *mumnpixhits, *mupnpixhits, *mumnpixlayers, *mupnpixlayers;
   vector<int>    *mumntrkhits, *mupntrkhits, *mumntrklayers, *mupntrklayers;
   vector<double> *mumnormchi2, *mupnormchi2;
+  vector<int>    *mumtrkqual, *muptrkqual;  /* added track quality vars */
   vector<double> *mumdxyvtx, *mupdxyvtx, *mumdzvtx, *mupdzvtx;
   vector<string> *mumtriglastfilter, *muptriglastfilter;
   vector<double> *mumpt, *muppt, *mumeta, *mupeta;
@@ -418,12 +420,12 @@ class BsToPhiMuMu : public edm::EDAnalyzer {
 
   //----------
   // For MC   
-  //----------                                                                                                                                                              
+  //----------                                                                                                                                               
   double genbpx, genbpy, genbpz;
   double genphipx, genphipy, genphipz;
   double genphivtxx, genphivtxy, genphivtxz;
 
-  //                                                                                                                                                                        
+  //                                                                                                                                                        
   int genkpchg;
   double genkppx, genkppy, genkppz;
   int genkmchg;
@@ -434,7 +436,7 @@ class BsToPhiMuMu : public edm::EDAnalyzer {
   
   string decname;
 
-  vector<bool> *istruemum, *istruemup, *istruekp, *istruekm, *istruephi, *istruebs;
+  vector<bool> *istruemum, *istruemup, *istruekp, *istruekm, /**istruephi,*/ *istruebs;
 
   //-----------------------
   // variables to monitor  
@@ -491,7 +493,7 @@ BsToPhiMuMu::BsToPhiMuMu(const edm::ParameterSet& iConfig):
   KeepGENOnly_(iConfig.getUntrackedParameter<bool>("KeepGENOnly")),
   TruthMatchMuonMaxR_(iConfig.getUntrackedParameter<double>("TruthMatchMuonMaxR")),
   TruthMatchKaonMaxR_(iConfig.getUntrackedParameter<double>("TruthMatchKaonMaxR")),
-  TruthMatchPhiMaxVtx_(iConfig.getUntrackedParameter<double>("TruthMatchPhiMaxVtx")),
+  //TruthMatchPhiMaxVtx_(iConfig.getUntrackedParameter<double>("TruthMatchPhiMaxVtx")),
 
   // pre-selection cuts                                                                                                                                                     
   MuonMinPt_(iConfig.getUntrackedParameter<double>("MuonMinPt")),
@@ -527,7 +529,9 @@ BsToPhiMuMu::BsToPhiMuMu(const edm::ParameterSet& iConfig):
   mumisgoodmuon(0), mupisgoodmuon(0),
   mumnpixhits(0), mupnpixhits(0), mumnpixlayers(0), mupnpixlayers(0),
   mumntrkhits(0), mupntrkhits(0), mumntrklayers(0), mupntrklayers(0),
-  mumnormchi2(0), mupnormchi2(0), mumdxyvtx(0), mupdxyvtx(0),
+  mumnormchi2(0), mupnormchi2(0), 
+  mumtrkqual(0), muptrkqual(0),         /* added */
+  mumdxyvtx(0), mupdxyvtx(0),
   mumdzvtx(0), mupdzvtx(0), mumtriglastfilter(0), muptriglastfilter(0),
   mumpt(0), muppt(0), mumeta(0), mupeta(0),
 
@@ -567,7 +571,7 @@ BsToPhiMuMu::BsToPhiMuMu(const edm::ParameterSet& iConfig):
 
   decname(""),
 
-  istruemum(0), istruemup(0), istruekp(0), istruekm(0), istruephi(0), istruebs(0)
+  istruemum(0), istruemup(0), istruekp(0), istruekm(0), /*istruephi(0),*/ istruebs(0)
 
 
 {
@@ -699,6 +703,8 @@ BsToPhiMuMu::beginJob()
   tree_->Branch("mupntrklayers", &mupntrklayers);
   tree_->Branch("mumnormchi2", &mumnormchi2);
   tree_->Branch("mupnormchi2", &mupnormchi2);
+  tree_->Branch("mumtrkqual", &mumtrkqual);  /* added quality vars */
+  tree_->Branch("muptrkqual", &muptrkqual);
   tree_->Branch("mumdxyvtx", &mumdxyvtx);
   tree_->Branch("mupdxyvtx", &mupdxyvtx);
   tree_->Branch("mumdzvtx", &mumdzvtx);
@@ -794,7 +800,7 @@ BsToPhiMuMu::beginJob()
     tree_->Branch("istruemup",  &istruemup );
     tree_->Branch("istruekp",   &istruekp  );
     tree_->Branch("istruekm",   &istruekm  );
-    tree_->Branch("istruephi",  &istruephi );
+    //tree_->Branch("istruephi",  &istruephi );
     tree_->Branch("istruebs",   &istruebs  );
 
   }
@@ -884,6 +890,7 @@ BsToPhiMuMu::clearVariables(){
   mumntrkhits->clear();  mupntrkhits->clear();  mumntrklayers->clear();  mupntrklayers->clear();
 
   mumnormchi2->clear(); mupnormchi2->clear();
+  mumtrkqual->clear(); muptrkqual->clear();    /* added */
   mumdxyvtx->clear(); mupdxyvtx->clear();
   mumdzvtx->clear(); mupdzvtx->clear();
   mumtriglastfilter->clear(); muptriglastfilter->clear();
@@ -936,7 +943,7 @@ BsToPhiMuMu::clearVariables(){
 
     decname = "";
     istruemum->clear(); istruemup->clear(); istruekp->clear();
-    istruekm->clear(); istruephi->clear(); istruebs->clear();
+    istruekm->clear(); /*istruephi->clear();*/ istruebs->clear();
 
 
   }
@@ -2123,6 +2130,9 @@ BsToPhiMuMu::saveSoftMuonVariables(pat::Muon iMuonM, pat::Muon iMuonP,
   mumnormchi2->push_back(muTrackm->normalizedChi2());
   mupnormchi2->push_back(muTrackp->normalizedChi2());
 
+  mumtrkqual->push_back(muTrackm->quality(reco::TrackBase::highPurity));   /* added */
+  muptrkqual->push_back(muTrackp->quality(reco::TrackBase::highPurity));
+
   mumdxyvtx->push_back(muTrackm->dxy(primaryVertex_.position()));
   mupdxyvtx->push_back(muTrackp->dxy(primaryVertex_.position()));
 
@@ -2240,9 +2250,9 @@ BsToPhiMuMu::saveTruthMatch(const edm::Event& iEvent){
       istruekp->push_back(false);
     }
 
-    //---------------------------------                                                                                                                                     
-    // truth match with kaon- track                                                                                                                                             
-    //---------------------------------                                                                                                                                      
+    //---------------------------------                                                                                                                           
+    // truth match with kaon- track                                                                                                                                 
+    //---------------------------------                                                                                                                              
     deltaEtaPhi = calEtaPhiDistance(genkmpx, genkmpy, genkmpz,
                                     kmpx->at(i), kmpy->at(i), kmpz->at(i));
     if (deltaEtaPhi < TruthMatchKaonMaxR_){
@@ -2267,16 +2277,17 @@ BsToPhiMuMu::saveTruthMatch(const edm::Event& iEvent){
     } else {
       istruephi->push_back(false);
     }
+    */
 
     //---------------------------------------
     // truth match with Bs or Bs bar 
     //---------------------------------------                                                                                                
-    if ( istruemum->back() && istruemup->back() && istruephi->back() ) {
+    if ( istruemum->back() && istruemup->back() && istruekm->back() && istruekp->back() ) {
       istruebs->push_back(true);
     } else {
       istruebs->push_back(false);
     }
-    */
+
 
 
   }//}}}
