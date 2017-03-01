@@ -2261,23 +2261,6 @@ BsToPhiMuMu::saveTruthMatch(const edm::Event& iEvent){
       istruekm->push_back(false);
     }
 
-    /*
-    //------------------------
-    // truth match phi vertex
-    //------------------------
-    float deltaRphivtx = sqrt( (genphivtxx - phivtxx->at(i))*
-			       (genphivtxx - phivtxx->at(i)) +
-			       (genphivtxy - phivtxy->at(i))*
-			       (genphivtxy - phivtxy->at(i)) +
-			       (genphivtxz - phivtxz->at(i))*
-			       (genphivtxz - phivtxz->at(i)) );
-
-    if ( istruekp && istruekm && (deltaRphivtx < TruthMatchPhiMaxVtx_) ){
-      istruephi->push_back(true);
-    } else {
-      istruephi->push_back(false);
-    }
-    */
 
     //---------------------------------------
     // truth match with Bs or Bs bar 
