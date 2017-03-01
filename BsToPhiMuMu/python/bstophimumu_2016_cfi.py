@@ -2,7 +2,8 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("Ntuple")
 
-#process.MessageLogger.cerr.FwkReport.reportEvery = 500
+process.load("FWCore.MessageService.MessageLogger_cfi")
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 process.options.allowUnscheduled = cms.untracked.bool(True)
 
@@ -77,7 +78,6 @@ process.ntuple = cms.EDAnalyzer(
     KeepGENOnly  = cms.untracked.bool(False),
     TruthMatchMuonMaxR = cms.untracked.double(0.004), # [eta-phi]
     TruthMatchKaonMaxR = cms.untracked.double(0.3), # [eta-phi]
-
 
     # HLT-trigger cuts (for reference https://espace.cern.ch/cms-quarkonia/trigger-bph/SitePages/2012-LowMass.aspx)
     MuonMinPt = cms.untracked.double(3.5), # 3.0 [GeV]
