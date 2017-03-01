@@ -35,4 +35,4 @@ for mc, do
 $ cmsRun bstophimumu_2016_mc.py
 
 
-If you have any queries, please write to nsahoo@cern.ch
+
