@@ -11,10 +11,6 @@ $ cmsenv
 
 $ scram b
 
-$ mkdir BpHaNa
-
-$ cd BpHaNa
-
 $ git clone https://github.com/nsahoo/Run2-Bs2PhiMM.git
 
 $ cd ../
