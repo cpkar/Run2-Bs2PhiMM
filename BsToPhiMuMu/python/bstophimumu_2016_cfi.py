@@ -37,7 +37,8 @@ from PhysicsTools.PatAlgos.tools.trackTools import makeTrackCandidates
 makeTrackCandidates(process,
                     label        = 'TrackCands',                  # output collection
                     tracks       = cms.InputTag('generalTracks'), # input track collection
-                    particleType = 'pi+',                         # particle type (for assigning a mass)
+                   ## particleType = 'pi+',                         # particle type (for assigning a mass)
+                    particleType = 'K+',                         # particle type (for assigning a mass)
                     preselection = 'pt > 0.4',                    # preselection cut on candidates
                     selection    = 'pt > 0.4',                    # selection on PAT Layer 1 objects
                     isolation    = {},                            # isolations to use (set to {} for None)
