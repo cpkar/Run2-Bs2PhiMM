@@ -80,8 +80,8 @@ process.ntuple = cms.EDAnalyzer(
     TruthMatchMuonMaxR = cms.untracked.double(0.004), # [eta-phi]
     TruthMatchKaonMaxR = cms.untracked.double(0.3), # [eta-phi]
 
-    # HLT-trigger cuts (for reference https://espace.cern.ch/cms-quarkonia/trigger-bph/SitePages/2012-LowMass.aspx)
-    MuonMinPt = cms.untracked.double(3.5), # 3.0 [GeV]
+    # check confdb for details
+    MuonMinPt = cms.untracked.double(4.0), # 3.0 [GeV]
     MuonMaxEta = cms.untracked.double(2.2),  
     MuonMaxDcaBs = cms.untracked.double(2.0), # [cm]
 
