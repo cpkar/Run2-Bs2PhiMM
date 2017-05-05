@@ -95,7 +95,7 @@ process.ntuple = cms.EDAnalyzer(
     MuMuMinCosAlphaBs = cms.untracked.double(0.9),
 
     # pre-selection cuts 
-    TrkMinPt = cms.untracked.double(0.4), # 0.4 [GeV/c]
+    TrkMinPt = cms.untracked.double(0.8), # 0.4 [GeV/c]
     TrkMinDcaSigBs = cms.untracked.double(0.8), # 0.8 hadron DCA/sigma w/respect to BS (=>changed Max to Min)
     TrkMaxR = cms.untracked.double(110.0), # [cm] ==> size of tracker volume in radial direction
     TrkMaxZ = cms.untracked.double(280.0), # [cm] ==> size of tracker volume in Z direction
