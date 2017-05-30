@@ -33,7 +33,7 @@
 #include <memory>
 
 //----------------------                                                                                                                       
-// user include files                                                                                                                                 
+// user include files                                                                                                                                
 //----------------------                                                                                                                         
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
@@ -315,7 +315,7 @@ class BsToPhiMuMu : public edm::EDAnalyzer {
   vector<string> LastFilterNames_;
 
   //---------------                                                                                                                                        
-  // gen particle                                                                                                                                                  
+  // gen particle                                                                                                                                     
   //---------------                                                                                                                                          
   bool   IsMonteCarlo_;
   bool   KeepGENOnly_;
@@ -323,7 +323,7 @@ class BsToPhiMuMu : public edm::EDAnalyzer {
   double TruthMatchKaonMaxR_;
   //double TruthMatchPhiMaxVtx_;
 
-  //---------------------                                                                                                                                           
+  //---------------------                                                                                                                       
   // pre-selection cuts                                                                                                                                   
   //---------------------                                                                                                                              
   double MuonMinPt_;
@@ -336,8 +336,12 @@ class BsToPhiMuMu : public edm::EDAnalyzer {
   double MuMuMaxDca_;
   double MuMuMinVtxCl_;
   double MuMuMinPt_;
-  double MuMuMinInvMass_;
-  double MuMuMaxInvMass_;
+  ////double MuMuMinInvMass_;
+  ////double MuMuMaxInvMass_;
+  double MuMuMinInvMass1_;
+  double MuMuMinInvMass2_;
+  double MuMuMaxInvMass1_;
+  double MuMuMaxInvMass2_;
   double MuMuMinLxySigmaBs_;
   double MuMuMinCosAlphaBs_;
   double PhiMinMass_;
@@ -357,7 +361,7 @@ class BsToPhiMuMu : public edm::EDAnalyzer {
 
   //-----------------                                                                                                                                          
   // Root Variables                                                                                                                                          
-  //-----------------                                                                                                                                           
+  //-----------------                                                                                                                                  
   TFile* fout_;
   TTree* tree_;
 
@@ -389,8 +393,8 @@ class BsToPhiMuMu : public edm::EDAnalyzer {
 
   //--------------
   // kaon track   
-  //--------------                                                                                                                                                          
-  //vector<int> *trkchg; // +1 for K+, -1 for K-                                                                                                                            
+  //--------------                                                                                                                                  
+  //vector<int> *trkchg; // +1 for K+, -1 for K-                                                                                                 
   //vector<double> *trkpx, *trkpy, *trkpz, *trkpt;
   vector<double> *kptrkdcabs, *kptrkdcabserr;
   vector<double> *kmtrkdcabs, *kmtrkdcabserr;
@@ -440,7 +444,7 @@ class BsToPhiMuMu : public edm::EDAnalyzer {
 
   //-----------------------
   // variables to monitor  
-  //-----------------------                                                                                                                                                 
+  //-----------------------                                                                                                                         
   TDatime t_begin_ , t_now_ ;
   int n_processed_, n_selected_;
 
@@ -463,14 +467,18 @@ BsToPhiMuMu::BsToPhiMuMu(const edm::ParameterSet& iConfig):
   //OutputFileName_(iConfig.getParameter<string>("OutputFileName")),
   BuildBsToPhiMuMu_(iConfig.getUntrackedParameter<bool>("BuildBsToPhiMuMu")),
 
-  // particle properties                                                                                                                                                    
+  //************************
+  // particle properties    
+  //************************                                                                                                                          
   MuonMass_(iConfig.getUntrackedParameter<double>("MuonMass")),
   MuonMassErr_(iConfig.getUntrackedParameter<double>("MuonMassErr")),
   KaonMass_(iConfig.getUntrackedParameter<double>("KaonMass")),
   KaonMassErr_(iConfig.getUntrackedParameter<double>("KaonMassErr")),
   BsMass_(iConfig.getUntrackedParameter<double>("BsMass")),
 
-  // labels                                                                                                                                                                 
+  //***********
+  // labels    
+  //***********                                                                                                                                         
   //GenParticlesLabel_(iConfig.getParameter<edm::InputTag>("GenParticlesLabel")),
   GenParticlesLabel_(consumes<reco::GenParticleCollection>(iConfig.getParameter<edm::InputTag>("GenParticlesLabel"))),
   //TriggerResultsLabel_(iConfig.getParameter<edm::InputTag>("TriggerResultsLabel")),
@@ -488,14 +496,18 @@ BsToPhiMuMu::BsToPhiMuMu(const edm::ParameterSet& iConfig):
   TriggerNames_(iConfig.getParameter< vector<string> >("TriggerNames")),
   LastFilterNames_(iConfig.getParameter< vector<string> >("LastFilterNames")),
 
-  // gen particle                                                                                                                                                           
+  //***************
+  // gen particle  
+  //***************                                                                                                                                  
   IsMonteCarlo_(iConfig.getUntrackedParameter<bool>("IsMonteCarlo")),
   KeepGENOnly_(iConfig.getUntrackedParameter<bool>("KeepGENOnly")),
   TruthMatchMuonMaxR_(iConfig.getUntrackedParameter<double>("TruthMatchMuonMaxR")),
   TruthMatchKaonMaxR_(iConfig.getUntrackedParameter<double>("TruthMatchKaonMaxR")),
   //TruthMatchPhiMaxVtx_(iConfig.getUntrackedParameter<double>("TruthMatchPhiMaxVtx")),
 
-  // pre-selection cuts                                                                                                                                                     
+  //*********************
+  // pre-selection cuts                                                                                                                                
+  //*********************
   MuonMinPt_(iConfig.getUntrackedParameter<double>("MuonMinPt")),
   MuonMaxEta_(iConfig.getUntrackedParameter<double>("MuonMaxEta")),
   MuonMaxDcaBs_(iConfig.getUntrackedParameter<double>("MuonMaxDcaBs")),
@@ -508,8 +520,12 @@ BsToPhiMuMu::BsToPhiMuMu(const edm::ParameterSet& iConfig):
   MuMuMaxDca_(iConfig.getUntrackedParameter<double>("MuMuMaxDca")),
   MuMuMinVtxCl_(iConfig.getUntrackedParameter<double>("MuMuMinVtxCl")),
   MuMuMinPt_(iConfig.getUntrackedParameter<double>("MuMuMinPt")),
-  MuMuMinInvMass_(iConfig.getUntrackedParameter<double>("MuMuMinInvMass")),
-  MuMuMaxInvMass_(iConfig.getUntrackedParameter<double>("MuMuMaxInvMass")),
+  ////  MuMuMinInvMass_(iConfig.getUntrackedParameter<double>("MuMuMinInvMass")),
+  MuMuMinInvMass1_(iConfig.getUntrackedParameter<double>("MuMuMinInvMass1")),
+  MuMuMinInvMass2_(iConfig.getUntrackedParameter<double>("MuMuMinInvMass2")),
+  ////  MuMuMaxInvMass_(iConfig.getUntrackedParameter<double>("MuMuMaxInvMass")),
+  MuMuMaxInvMass1_(iConfig.getUntrackedParameter<double>("MuMuMaxInvMass1")),
+  MuMuMaxInvMass2_(iConfig.getUntrackedParameter<double>("MuMuMaxInvMass2")),
   MuMuMinLxySigmaBs_(iConfig.getUntrackedParameter<double>("MuMuMinLxySigmaBs")),
   MuMuMinCosAlphaBs_(iConfig.getUntrackedParameter<double>("MuMuMinCosAlphaBs")),
 
@@ -967,16 +983,16 @@ BsToPhiMuMu::hltReport(const edm::Event& iEvent)
 
     for (unsigned int itrig = 0; itrig < hltTriggerResults->size(); itrig++){
 
-      // Only consider the triggered case.                                                                                                                          
+      // Only consider the triggered case.                                                                                                               
       if ((*hltTriggerResults)[itrig].accept() == 1){
 
         string triggername = triggerNames_.triggerName(itrig);
         int triggerprescale = hltConfig_.prescaleValue(itrig, triggername);
 
-        // Loop over our interested HLT trigger names to find if this event contains.                                                                               
+        // Loop over our interested HLT trigger names to find if this event contains.                                                                   
         for (unsigned int it=0; it<TriggerNames_.size(); it++){
           if (triggername.find(TriggerNames_[it]) != string::npos) {
-            // save the no versioned case                                                                                                                            
+            // save the no versioned case                                                                                                                
             triggernames->push_back(TriggerNames_[it]);
 	    //cout<<triggernames<<endl;
             triggerprescales->push_back(triggerprescale);
@@ -1523,8 +1539,10 @@ BsToPhiMuMu::hasGoodMuMuVertex ( const reco::TransientTrack muTrackpTT,
   mu_mu_mass_err = sqrt(mumu_KP->currentState().kinematicParametersError().
 			matrix()(6,6));
 
-  if ((mu_mu_pt < MuMuMinPt_) || (mu_mu_mass < MuMuMinInvMass_) ||
-      (mu_mu_mass > MuMuMaxInvMass_))  return false;
+  if ((mu_mu_pt < MuMuMinPt_) || 
+      /////(mu_mu_mass < MuMuMinInvMass_) ||
+      /////(mu_mu_mass > MuMuMaxInvMass_))  return false;
+      (mu_mu_mass < MuMuMinInvMass1_) || (mu_mu_mass > MuMuMaxInvMass2_) || (mu_mu_mass < MuMuMinInvMass2_ && mu_mu_mass > MuMuMaxInvMass1_)) return false;
 
   // compute the distance between mumu vtx and beam spot
   calLS (mumu_KV->position().x(),mumu_KV->position().y(),0.0,
