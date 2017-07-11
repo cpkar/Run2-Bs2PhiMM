@@ -63,7 +63,7 @@ double dimupt         = 0;
 double dimueta        = 0;
 double CosThetaL      = 999;
 double CosThetaK      = 999;
-double PhiAng         = 999;
+double Phi            = 999;
 int    Triggers       = 0;
 
 // Branches for Generator level information
@@ -85,7 +85,7 @@ double  gendimuPhi   = 0;
 double  genQ2        = 0;
 double  genCosThetaL = 999;
 double  genCosThetaK = 999;
-double  genPhiAng    = 999;
+double  genPhi       = 999;
 
 
 void ClearEvent()
@@ -114,7 +114,7 @@ void ClearEvent()
   dimueta        = 0;
   CosThetaL      = 999;
   CosThetaK      = 999;
-  PhiAng         = 999;
+  Phi            = 999;
   Triggers       = 0;
 
   //mc
@@ -136,7 +136,7 @@ void ClearEvent()
   genQ2          = 0;
   genCosThetaL   = 999;
   genCosThetaK   = 999;
-  genPhiAng      = 999;
+  genPhi         = 999;
 
 }//}}}
 
@@ -216,7 +216,7 @@ void SingleBsToPhiMuMuSelector::SlaveBegin(TTree * /*tree*/)
    tree_->Branch("dimueta"       , &dimueta       , "dimueta/D");
    tree_->Branch("CosThetaL"     , &CosThetaL     , "CosThetaL/D");
    tree_->Branch("CosThetaK"     , &CosThetaK     , "CosThetaK/D");
-   tree_->Branch("PhiAng"        , &PhiAng        , "PhiAng/D");
+   tree_->Branch("Phi"           , &Phi           , "Phi/D");
    tree_->Branch("Triggers"      , &Triggers      , "Triggers/I");
 
    string datatype = get_option_value(option, "datatype");
@@ -246,7 +246,7 @@ void SingleBsToPhiMuMuSelector::SlaveBegin(TTree * /*tree*/)
      tree_->Branch("genQ2"        , &genQ2        , "genQ2/D");
      tree_->Branch("genCosThetaL" , &genCosThetaL , "genCosThetaL/D");
      tree_->Branch("genCosThetaK" , &genCosThetaK , "genCosThetaK/D");
-     tree_->Branch("genPhiAng"    , &genPhiAng    , "genPhiAng/D");
+     tree_->Branch("genPhi"       , &genPhi       , "genPhi/D");
      break;
    case 998:
      break;
@@ -457,9 +457,9 @@ void SingleBsToPhiMuMuSelector::SaveEvent(int i)
   TVector3 PhiPlane = Kp_4vec.Vect().Cross(Km_4vec.Vect());
   cout << "cross product mag. of kaons (at RECO level) = " << PhiPlane.Mag() << endl;
   if (MuMuPlane.Cross(PhiPlane).Dot(-B_4vec.Vect()) > 0.0)
-    PhiAng = MuMuPlane.Angle(PhiPlane);
+    Phi = MuMuPlane.Angle(PhiPlane);
   else
-    PhiAng = -MuMuPlane.Angle(PhiPlane);
+    Phi = -MuMuPlane.Angle(PhiPlane);
 
   Triggers = triggernames->size();
 
@@ -522,9 +522,9 @@ void SingleBsToPhiMuMuSelector::SaveGen()
   TVector3 PhiPlane = genKp_4vec.Vect().Cross(genKm_4vec.Vect());
   cout << "cross product mag. of kaons (at GEN level) = " << PhiPlane.Mag() << endl;
   if (MuMuPlane.Cross(PhiPlane).Dot(-genB_4vec.Vect()) > 0.0) 
-    genPhiAng = MuMuPlane.Angle(PhiPlane);
+    genPhi = MuMuPlane.Angle(PhiPlane);
   else                                                        
-    genPhiAng = -MuMuPlane.Angle(PhiPlane);
+    genPhi = -MuMuPlane.Angle(PhiPlane);
 
 }//}}}
 
