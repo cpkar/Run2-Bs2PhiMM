@@ -3,6 +3,7 @@
 // @author: N.Sahoo, NISER, BHUBANESWAR
 
 // to do: add phi momentum info to the analyzer
+// 2017-07-11: added phi angle info 
 //----------------------------------------------
 
 #define SingleBsToPhiMuMuSelector_cxx
@@ -16,6 +17,7 @@
 #include <TProof.h>
 #include <string.h>
 #include <TLorentzVector.h>
+#include <TVector3.h>
 
 //-------------------
 // Global Constants
@@ -61,6 +63,7 @@ double dimupt         = 0;
 double dimueta        = 0;
 double CosThetaL      = 999;
 double CosThetaK      = 999;
+double PhiAng         = 999;
 int    Triggers       = 0;
 
 // Branches for Generator level information
@@ -75,13 +78,14 @@ double  genMumPt     = 0;
 double  genMumEta    = 0;
 double  genMumPhi    = 0;
 
-double gendimuPt     = 0;
-double gendimuEta    = 0;
-double gendimuPhi    = 0;
+double  gendimuPt    = 0;
+double  gendimuEta   = 0;
+double  gendimuPhi   = 0;
 
 double  genQ2        = 0;
 double  genCosThetaL = 999;
-double genCosThetaK  = 999;
+double  genCosThetaK = 999;
+double  genPhiAng    = 999;
 
 
 void ClearEvent()
@@ -110,6 +114,7 @@ void ClearEvent()
   dimueta        = 0;
   CosThetaL      = 999;
   CosThetaK      = 999;
+  PhiAng         = 999;
   Triggers       = 0;
 
   //mc
@@ -131,6 +136,7 @@ void ClearEvent()
   genQ2          = 0;
   genCosThetaL   = 999;
   genCosThetaK   = 999;
+  genPhiAng      = 999;
 
 }//}}}
 
@@ -210,6 +216,7 @@ void SingleBsToPhiMuMuSelector::SlaveBegin(TTree * /*tree*/)
    tree_->Branch("dimueta"       , &dimueta       , "dimueta/D");
    tree_->Branch("CosThetaL"     , &CosThetaL     , "CosThetaL/D");
    tree_->Branch("CosThetaK"     , &CosThetaK     , "CosThetaK/D");
+   tree_->Branch("PhiAng"        , &PhiAng        , "PhiAng/D");
    tree_->Branch("Triggers"      , &Triggers      , "Triggers/I");
 
    string datatype = get_option_value(option, "datatype");
@@ -239,6 +246,7 @@ void SingleBsToPhiMuMuSelector::SlaveBegin(TTree * /*tree*/)
      tree_->Branch("genQ2"        , &genQ2        , "genQ2/D");
      tree_->Branch("genCosThetaL" , &genCosThetaL , "genCosThetaL/D");
      tree_->Branch("genCosThetaK" , &genCosThetaK , "genCosThetaK/D");
+     tree_->Branch("genPhiAng"    , &genPhiAng    , "genPhiAng/D");
      break;
    case 998:
      break;
@@ -422,7 +430,12 @@ void SingleBsToPhiMuMuSelector::SaveEvent(int i)
 
   buff1.Boost(-buff2.X()/buff2.T(),-buff2.Y()/buff2.T(),-buff2.Z()/buff2.T());
 
-  buff3 = Mum_4vec;
+  // review this part again ??
+  //  if ( Bchg > 0){
+    buff3 = Mum_4vec; 
+    //  }else{
+    //buff3 = Mup_4vec;
+    //  }
   buff3.Boost(-buff2.X()/buff2.T(),-buff2.Y()/buff2.T(),-buff2.Z()/buff2.T());
   CosThetaL = buff1.Vect().Dot(buff3.Vect())/buff1.Vect().Mag()/buff3.Vect().Mag();
     
@@ -432,6 +445,21 @@ void SingleBsToPhiMuMuSelector::SaveEvent(int i)
   buff3 = Km_4vec; // double-check 
   buff3.Boost(-buff2.X()/buff2.T(),-buff2.Y()/buff2.T(),-buff2.Z()/buff2.T());
   CosThetaK = buff1.Vect().Dot(buff3.Vect())/buff1.Vect().Mag()/buff3.Vect().Mag();
+
+  // add phi angle
+  TVector3 boostB = B_4vec.BoostVector();
+  Mum_4vec.Boost(-boostB);
+  Mup_4vec.Boost(-boostB);
+  Km_4vec.Boost(-boostB);
+  Kp_4vec.Boost(-boostB);
+  TVector3 MuMuPlane = Mum_4vec.Vect().Cross(Mup_4vec.Vect());   /// cross product between mu- and mu+ vectors                                       
+  cout << "cross product mag. of muons (at RECO level) = " << MuMuPlane.Mag() << endl;
+  TVector3 PhiPlane = Kp_4vec.Vect().Cross(Km_4vec.Vect());
+  cout << "cross product mag. of kaons (at RECO level) = " << PhiPlane.Mag() << endl;
+  if (MuMuPlane.Cross(PhiPlane).Dot(-B_4vec.Vect()) > 0.0)
+    PhiAng = MuMuPlane.Angle(PhiPlane);
+  else
+    PhiAng = -MuMuPlane.Angle(PhiPlane);
 
   Triggers = triggernames->size();
 
@@ -468,8 +496,11 @@ void SingleBsToPhiMuMuSelector::SaveGen()
   gendimuPhi   = buff2.Phi();
 
   buff1.Boost(-buff2.X()/buff2.T(),-buff2.Y()/buff2.T(),-buff2.Z()/buff2.T());
-
-  buff3 = genMum_4vec;//Take mu- to avoid extra minus sign.
+  //  if (genBChg > 0){
+    buff3 = genMum_4vec;//Take mu- to avoid extra minus sign.
+    //}else{
+    //buff3 = genMup_4vec;
+    //}
   buff3.Boost(-buff2.X()/buff2.T(),-buff2.Y()/buff2.T(),-buff2.Z()/buff2.T());
   genCosThetaL = buff1.Vect().Dot(buff3.Vect())/buff1.Vect().Mag()/buff3.Vect().Mag();
     
@@ -479,6 +510,21 @@ void SingleBsToPhiMuMuSelector::SaveGen()
   buff3 = genKm_4vec; // double check
   buff3.Boost(-buff2.X()/buff2.T(),-buff2.Y()/buff2.T(),-buff2.Z()/buff2.T());
   genCosThetaK = buff1.Vect().Dot(buff3.Vect())/buff1.Vect().Mag()/buff3.Vect().Mag();
+ 
+  // add phi angle
+  TVector3 boostB = genB_4vec.BoostVector();
+  genMum_4vec.Boost(-boostB);
+  genMup_4vec.Boost(-boostB);
+  genKm_4vec.Boost(-boostB);
+  genKp_4vec.Boost(-boostB);
+  TVector3 MuMuPlane = genMum_4vec.Vect().Cross(genMup_4vec.Vect());   /// cross product between mu- and mu+ vectors
+  cout << "cross product mag. of muons (at GEN level) = " << MuMuPlane.Mag() << endl;
+  TVector3 PhiPlane = genKp_4vec.Vect().Cross(genKm_4vec.Vect());
+  cout << "cross product mag. of kaons (at GEN level) = " << PhiPlane.Mag() << endl;
+  if (MuMuPlane.Cross(PhiPlane).Dot(-genB_4vec.Vect()) > 0.0) 
+    genPhiAng = MuMuPlane.Angle(PhiPlane);
+  else                                                        
+    genPhiAng = -MuMuPlane.Angle(PhiPlane);
 
 }//}}}
 
@@ -527,7 +573,8 @@ int main(int argc, char** argv) {
   Printf("input file: '%s'", infile.Data());
   Printf("output file: '%s'", outfile.Data());
 
-  TChain *ch = new TChain("ntuple/tree"); 
+  ///TChain *ch = new TChain("ntuple/tree"); 
+  TChain *ch = new TChain("tree"); 
   ch->Add(infile.Data()); 
 
   char *j = get_option(argv, argv+argc, "-j");
