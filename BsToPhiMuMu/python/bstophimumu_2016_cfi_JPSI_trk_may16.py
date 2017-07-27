@@ -52,10 +52,13 @@ process.load('PhysicsTools.PatAlgos.slimming.genParticles_cff')
 process.packedGenParticles.inputVertices = cms.InputTag('offlinePrimaryVertices')
 
 
+from PhysicsTools.PatAlgos.tools.coreTools import runOnData
+runOnData( process, outputModules = [] )
+
 process.ntuple = cms.EDAnalyzer(
     'BsToPhiMuMu',
 
-    #OutputFileName = cms.string("BsToPhiMuMu_test.root"),
+    OutputFileName = cms.string("BsToPhiMuMu_2016.root"),
     BuildBsToPhiMuMu = cms.untracked.bool(True), 
 
     MuonMass = cms.untracked.double(0.10565837), 
@@ -116,11 +119,11 @@ process.ntuple = cms.EDAnalyzer(
 
 )
 
-from PhysicsTools.PatAlgos.tools.coreTools import runOnData
-runOnData( process, outputModules = [] )
+##from PhysicsTools.PatAlgos.tools.coreTools import runOnData
+##runOnData( process, outputModules = [] )
 
-process.TFileService = cms.Service("TFileService",
-        fileName = cms.string('BsToPhiMuMu_2016.root'),
-)
+##process.TFileService = cms.Service("TFileService",
+##        fileName = cms.string('BsToPhiMuMu_2016.root'),
+##)
 
 process.p = cms.Path(process.ntuple)
