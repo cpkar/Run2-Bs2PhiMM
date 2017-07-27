@@ -129,7 +129,7 @@ enum HistName{
   h_mumucosalphabs,
   h_kaontrkpt,
   h_kaontrkdcasigbs,
-  h_bsvtxchisq,
+  /////h_bsvtxchisq,
   h_bsvtxcl,
 
   h_phimass,
@@ -151,20 +151,20 @@ HistArgs hist_args[kHistNameSize] = {
   {"h_mumutrkr", "#mu^{+}#mu^{-} distance in phi-eta; [cm]", 100, 0, 50},
   {"h_mumutrkz", "#mu^{+}#mu^{-} distance in Z; [cm]", 100, 0, 100},
 
-  {"h_mumudca",  "#mu^{+}#mu^{-} DCA; [cm]", 100, 0, 20},
-  {"h_mumuvtxcl",  "#mu^{+}#mu^{-} vertex CL", 100, 0, 1},
+  {"h_mumudca",  "#mu^{+}#mu^{-} DCA; DCA [cm]", 100, 0, 20},
+  {"h_mumuvtxcl",  "#mu^{+}#mu^{-} vertex CL; dimuon vtx. CL", 100, 0, 1},
   {"h_mumupt",    "#mu^{+}#mu^{-} pT ; pT [GeV]", 100, 0, 50},
   {"h_mumumass", "#mu^{+}#mu^{-} invariant mass; M(#mu^{+}#mu^{-}) [GeV/c^{2}]", 100, 2, 20},
-  {"h_mumulxybs", "#mu^{+}#mu^{-} Lxy #sigma beam spot", 100, 0, 100},
+  {"h_mumulxybs", "#mu^{+}#mu^{-} Lxy #sigma beam spot; L_{xy}/#sigma(#mu#mu)", 100, 0, 100},
+  {"h_mumucosalphabs", "#mu^{+}#mu^{-} cos #alpha beam spot; cos(#alpha)(#mu#mu)", 100, 0, 1},
 
-  {"h_mumucosalphabs", "#mu^{+}#mu^{-} cos #alpha beam spot", 100, 0, 1},
   {"h_kaontrkpt", "kaon track pT; pT [GeV]", 100, 0, 20},
   {"h_kaontrkdcasigbs", "kaon track DCA/#sigma beam spot; DCA/#sigma", 1000, 0, 100},
-  {"h_bsvtxchisq", "B_{s} decay vertex chisq", 100, 0, 1000},
-  {"h_bsvtxcl", "B_{s} decay vertex CL", 100, 0, 1},
 
-  {"h_phimass", "#phi(1020) mass; M(KK) [GeV/^{2}]", 100, 0, 20},   
-  {"h_bsmass", "B_{s} mass; M(KK#mu#mu) [GeV]", 100, 0, 20},                                                                                           
+  ////{"h_bsvtxchisq", "B_{s} decay vertex chisq", 100, 0, 1000},
+  {"h_bsvtxcl", "B_{s} decay vertex CL; B_{s} vtx. CL", 100, 0, 1},
+  {"h_phimass", "#phi(1020) mass; M(KK) [GeV/c^{2}]", 100, 0, 20},   
+  {"h_bsmass", "B_{s} mass; M(KK#mu#mu) [GeV/c^{2}]", 100, 0, 20},                                                                                           
 
 };
 
@@ -280,7 +280,7 @@ class BsToPhiMuMu : public edm::EDAnalyzer {
 
 
   // --- begin input from python file ---                                                                                                           
-  //string OutputFileName_;
+  string OutputFileName_;
   bool BuildBsToPhiMuMu_;
 
   //----------------------                                                                                                                                 
@@ -464,7 +464,7 @@ class BsToPhiMuMu : public edm::EDAnalyzer {
 //
 BsToPhiMuMu::BsToPhiMuMu(const edm::ParameterSet& iConfig):
 
-  //OutputFileName_(iConfig.getParameter<string>("OutputFileName")),
+  OutputFileName_(iConfig.getParameter<string>("OutputFileName")),
   BuildBsToPhiMuMu_(iConfig.getUntrackedParameter<bool>("BuildBsToPhiMuMu")),
 
   //************************
@@ -628,12 +628,14 @@ BsToPhiMuMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   if (IsMonteCarlo_) saveGenInfo(iEvent);
 
-  hltReport(iEvent);
+  ////hltReport(iEvent);
 
-  if ( KeepGENOnly_){
+  ///if ( KeepGENOnly_){
+  if ( IsMonteCarlo_ && KeepGENOnly_){
     tree_->Fill();
     n_selected_ += 1;
   }else{
+    hltReport(iEvent);
     if ( hasBeamSpot(iEvent) ) {
       iSetup.get<IdealMagneticFieldRecord>().get(bFieldHandle_);
       if ( bFieldHandle_.isValid() && hasPrimaryVertex(iEvent) ) {
@@ -667,9 +669,9 @@ BsToPhiMuMu::beginJob()
   n_processed_ = 0;
   n_selected_ = 0;
 
-  //fout_ = new TFile(OutputFileName_.c_str(), "RECREATE");
-  //fout_->cd();
-  edm::Service<TFileService> fs;
+  fout_ = new TFile(OutputFileName_.c_str(), "RECREATE");
+  fout_->cd();
+  ///edm::Service<TFileService> fs;
 
   for(int i=0; i<kHistNameSize; i++) {
     histos[i] = new TH1F(hist_args[i].name, hist_args[i].title,
@@ -678,8 +680,8 @@ BsToPhiMuMu::beginJob()
 
   }
 
-  //tree_ = new TTree ("tree", "BsToPhiMuMu");
-  tree_ = fs->make<TTree>("tree","Bs->J/psi kaskey menos ntuple");
+  tree_ = new TTree ("tree", "BsToPhiMuMu");
+  ///tree_ = fs->make<TTree>("tree","Bs->J/psi kaskey menos ntuple");
 
   tree_->Branch("run", &run, "run/i");
   tree_->Branch("event", &event, "event/i");
@@ -829,9 +831,9 @@ BsToPhiMuMu::endJob()
 {
 
 
-  //fout_->cd();
+  fout_->cd();
   //tree_->Write();
-  tree_->GetDirectory()->cd();
+  /////tree_->GetDirectory()->cd();
   tree_->Write();
 
   for(int i = 0; i < kHistNameSize; i++) {
@@ -839,7 +841,7 @@ BsToPhiMuMu::endJob()
     histos[i]->Delete();
   }
   
-  //fout_->Close();
+  fout_->Close();
 
   t_now_.Set();
   printf(" \n ---------- End Job ---------- \n" ) ;
